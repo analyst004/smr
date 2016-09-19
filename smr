@@ -7,7 +7,15 @@ if [ "$PASSWORD" != "$PASSWORD2" ]; then
   exit 1
 fi
 
-PASSWORD_HASH=`openssl passwd -1 $PASSWORD`
+while True
+do
+  PASSWORD_HASH=`openssl passwd -1 ${PASSWORD}`
+  if [[ ${PASSWORD_HASH} != *"/"* ]]; then
+    break
+  fi
+done
+
+echo $PASSWORD_HASH
 
 MIRROR=http://mirrors.tuna.tsinghua.edu.cn
 
@@ -225,11 +233,11 @@ cp /Volumes/CentOS_${CENTOS_TAR_FILE}_Final/repodata/*-minimal-x86_64.xml build/
 #<packagereq type='mandatory'>iptables-ipv6</packagereq>
 #<packagereq type='mandatory'>iptables</packagereq>
 #rm -rf build/Packages/iptables-*.rpm
-#sed -i -- '/iptables/d' build/repodata/smr.xml
+#sed -i '' '/iptables/d' build/repodata/smr.xml
 
 # Remove selinux
 rm -rf build/Packages/selinux-policy-*.rpm
-sed -i -- '/selinux-policy/d' build/repodata/smr.xml
+sed -i '' '/selinux-policy/d' build/repodata/smr.xml
 
 DISCINFO=`head -1 build/.discinfo`
 echo $DISCINFO
@@ -245,24 +253,86 @@ fi
 cd ..
 
 cp smr.kickstart build/isolinux/smr.cfg
-sed -i -- "s/#PASSWORD_HASH#/${PASSWORD_HASH}/g" build/isolinux/smr.cfg
-sed -i -- "s/#HADOOP_TAR_FILE#/${HADOOP_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#HBASE_TAR_FILE#/${HBASE_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#SPARK_TAR_FILE#/${SPARK_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#SQOOP_TAR_FILE#/${SQOOP_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#PIG_TAR_FILE#/${PIG_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#ZOOKEEPER_TAR_FILE#/${ZOOKEEPER_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#OOZIE_TAR_FILE#/${OOZIE_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#HIVE_TAR_FILE#/${HIVE_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#TEZ_TAR_FILE#/${TEZ_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#STORM_TAR_FILE#/${STORM_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#KAFKA_TAR_FILE#/${KAFKA_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#AMBARI_TAR_FILE#/${AMBARI_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#MESOS_TAR_FILE#/${MESOS_TAR_FILE}/g" build/isolinux/smr.cfg
-sed -i -- "s/#JDK_TAR_FILE#/${JDK_TAR_FILE}/g" build/isolinux/smr.cfg
+
+sed -i '' "s/#HADOOP_TAR_FILE#/${HADOOP_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${HADOOP_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#HBASE_TAR_FILE#/${HBASE_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${HBASE_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#SPARK_TAR_FILE#/${SPARK_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${SPARK_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#SQOOP_TAR_FILE#/${SQOOP_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${SQOOP_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#PIG_TAR_FILE#/${PIG_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${PIG_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#ZOOKEEPER_TAR_FILE#/${ZOOKEEPER_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${ZOOKEEPER_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#OOZIE_TAR_FILE#/${OOZIE_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${OOZIE_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#HIVE_TAR_FILE#/${HIVE_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${HIVE_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#TEZ_TAR_FILE#/${TEZ_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${TEZ_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#STORM_TAR_FILE#/${STORM_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${STORM_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#KAFKA_TAR_FILE#/${KAFKA_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${KAFKA_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#AMBARI_TAR_FILE#/${AMBARI_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${AMBARI_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#MESOS_TAR_FILE#/${MESOS_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${MESOS_TAR_FILE} Fail."
+  exit 1
+fi
+sed -i '' "s/#JDK_TAR_FILE#/${JDK_TAR_FILE}/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace ${JDK_TAR_FILE} Fail."
+  exit 1
+fi
+echo ${PASSWORD_HASH}
+sed -i '' "s/#PASSWORD_HASH#/$PASSWORD_HASH/g" build/isolinux/smr.cfg
+if [ $? -ne 0 ]; then
+  echo "Repleace Password Hash Fail."
+  exit 1
+fi
 
 cp isolinux.kickstart build/isolinux/isolinux.cfg
-sed -i -- "s/#VERSION#/${VERSION}/g" build/isolinux/isolinux.cfg
+sed -i '' "s/#VERSION#/${VERSION}/g" build/isolinux/isolinux.cfg
 if [ $? -ne 0 ]; then
   echo "Create KickStart Script Fail."
   exit 1
