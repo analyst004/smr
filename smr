@@ -1,0 +1,282 @@
+#!/bin/bash
+
+PASSWORD=`echo 'import getpass; print getpass.getpass(prompt="Please Enter Cluster Password: ")' | python - `
+PASSWORD2=`echo 'import getpass; print getpass.getpass(prompt="Retype Cluster Password: ")' | python - `
+if [ "$PASSWORD" != "$PASSWORD2" ]; then
+  echo "Password Dismatch."
+  exit 1
+fi
+
+PASSWORD_HASH=`openssl passwd -1 $PASSWORD`
+
+MIRROR=http://mirrors.tuna.tsinghua.edu.cn
+
+VERSION=1.0.0
+CENTOS_TAR_FILE=6.8
+HADOOP_TAR_FILE=2.6.4
+SPARK_TAR_FILE=1.6.2
+SQOOP_TAR_FILE=1.4.6
+HBASE_TAR_FILE=1.1.6
+PIG_TAR_FILE=0.16.0
+ZOOKEEPER_TAR_FILE=3.4.6
+OOZIE_TAR_FILE=4.2.0
+HIVE_TAR_FILE=2.0.0
+TEZ_TAR_FILE=0.8.2
+STORM_TAR_FILE=1.0.2
+PARQUET_TAR_FILE=2.3.1
+MESOS_TAR_FILE=1.0.1
+KAFKA_TAR_FILE=0.8.2.0
+AMBARI_TAR_FILE=2.4.1
+
+mkdir -p build/Components
+mkdir -p temp
+mkdir -p dist
+
+CENTOS_ISO_FILE=CentOS-${CENTOS_TAR_FILE}-x86_64-minimal.iso
+CENTOS_ISO_URL=${MIRROR}/centos/${CENTOS_TAR_FILE}/isos/x86_64/${CENTOS_ISO_FILE}
+if [ ! -e "temp/$CENTOS_ISO_FILE" ]; then
+  wget -O temp/${CENTOS_ISO_FILE} $CENTOS_ISO_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${CENTOS_ISO_FILE} Fail."
+    exit 1
+  fi
+fi
+
+JDK_TAR_FILE=jdk-7u79-linux-x64.tar.gz
+JDK_TAR_URL=http://download.oracle.com/otn-pub/java/jdk/7u79-b15/${JDK_TAR_FILE}
+if [ ! -e "build/Components/$JDK_TAR_FILE" ]; then
+  wget --no-check-certificate --no-cookies -O build/Components/$JDK_TAR_FILE --header "Cookie: oraclelicense=accept-securebackup-cookie" $JDK_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${JAVA_RPM_FILE} Fail."
+    exit 1
+  fi
+fi
+
+HADOOP_TAR_FILE=hadoop-${HADOOP_TAR_FILE}.tar.gz
+HADOOP_TAR_URL=${MIRROR}/apache/hadoop/common/hadoop-${HADOOP_TAR_FILE}/${HADOOP_TAR_FILE}
+if [ ! -e "build/Components/$HADOOP_TAR_FILE" ]; then
+  wget -O build/Components/${HADOOP_TAR_FILE} $HADOOP_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${HADOOP_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+SPARK_TAR_FILE=spark-${SPARK_TAR_FILE}-bin-hadoop2.6.tgz
+SPARK_TAR_URL=${MIRROR}/apache/spark/spark-${SPARK_TAR_FILE}/${SPARK_TAR_FILE}
+if [ ! -e "build/Components/$SPARK_TAR_FILE" ]
+then
+  wget -O build/Components/${SPARK_TAR_FILE} $SPARK_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${SPARK_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+SQOOP_TAR_FILE=sqoop-${SQOOP_TAR_FILE}.tar.gz
+SQOOP_TAR_URL=${MIRROR}/apache/sqoop/${SQOOP_TAR_FILE}/${SQOOP_TAR_FILE}
+if [ ! -e "build/Components/$SQOOP_TAR_FILE" ]
+then
+  wget -O build/Components/${SQOOP_TAR_FILE} $SQOOP_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${SQOOP_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+HBASE_TAR_FILE=hbase-${HBASE_TAR_FILE}-bin.tar.gz
+HBASE_TAR_URL=${MIRROR}/apache/hbase/${HBASE_TAR_FILE}/${HBASE_TAR_FILE}
+if [ ! -e "build/Components/$HBASE_TAR_FILE" ]
+then
+  wget -O build/Components/${HBASE_TAR_FILE} $HBASE_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${HBASE_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+PIG_TAR_FILE=pig-${PIG_TAR_FILE}.tar.gz
+PIG_TAR_URL=${MIRROR}/apache/pig/${PIG_TAR_FILE}/${PIG_TAR_FILE}
+if [ ! -e "build/Components/$PIG_TAR_FILE" ]
+then
+  wget -O build/Components/${PIG_TAR_FILE} $PIG_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${PIG_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+ZOOKEEPER_TAR_FILE=zookeeper-${ZOOKEEPER_TAR_FILE}.tar.gz
+ZOOKEEPER_TAR_URL=${MIRROR}/apache/zookeeper/${ZOOKEEPER_TAR_FILE}/${ZOOKEEPER_TAR_FILE}
+if [ ! -e "build/Components/$ZOOKEEPER_TAR_FILE" ]
+then
+  wget -O build/Components/${ZOOKEEPER_TAR_FILE} $ZOOKEEPER_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${ZOOKEEPER_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+OOZIE_TAR_FILE=oozie-${OOZIE_TAR_FILE}.tar.gz
+OOZIE_TAR_URL=${MIRROR}/apache/oozie/${OOZIE_TAR_FILE}/${OOZIE_TAR_FILE}
+if [ ! -e "build/Components/$OOZIE_TAR_FILE" ]
+then
+  wget -O build/Components/${OOZIE_TAR_FILE} $OOZIE_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${OOZIE_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+HIVE_TAR_FILE=apache-hive-${HIVE_TAR_FILE}-bin.tar.gz
+HIVE_TAR_URL=${MIRROR}/apache/hive/hive-${HIVE_TAR_FILE}/${HIVE_TAR_FILE}
+if [ ! -e "build/Components/$HIVE_TAR_FILE" ]
+then
+  wget -O build/Components/${HIVE_TAR_FILE} $HIVE_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${HIVE_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+TEZ_TAR_FILE=apache-tez-${TEZ_TAR_FILE}-src.tar.gz
+TEZ_TAR_URL=${MIRROR}/apache/tez/${TEZ_TAR_FILE}/${TEZ_TAR_FILE}
+if [ ! -e "build/Components/$TEZ_TAR_FILE" ]
+then
+  wget -O build/Components/${TEZ_TAR_FILE} $TEZ_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${TEZ_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+STORM_TAR_FILE=apache-storm-${STORM_TAR_FILE}.tar.gz
+STORM_TAR_URL=${MIRROR}/apache/storm/apache-storm-${STORM_TAR_FILE}/${STORM_TAR_FILE}
+if [ ! -e "build/Components/$STORM_TAR_FILE" ]
+then
+  wget -O build/Components/${STORM_TAR_FILE} $STORM_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${STORM_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+PARQUET_TAR_FILE=apache-parquet-format-${PARQUET_TAR_FILE}.tar.gz
+PARQUET_TAR_URL=${MIRROR}/apache/parquet/apache-parquet-format-${PARQUET_TAR_FILE}/${PARQUET_TAR_FILE}
+if [ ! -e "build/Components/$PARQUET_TAR_FILE" ]
+then
+  wget -O build/Components/${PARQUET_TAR_FILE} $PARQUET_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${PARQUET_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+MESOS_TAR_FILE=mesos-${MESOS_TAR_FILE}.tar.gz
+MESOS_TAR_URL=${MIRROR}/apache/mesos/${MESOS_TAR_FILE}/${MESOS_TAR_FILE}
+if [ ! -e "build/Components/${MESOS_TAR_FILE}" ]
+then
+  wget -O build/Components/${MESOS_TAR_FILE} $MESOS_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${MESOS_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+KAFKA_TAR_FILE=kafka_2.10-${KAFKA_TAR_FILE}.tgz
+KAFKA_TAR_URL=${MIRROR}/apache/kafka/${KAFKA_TAR_FILE}/${KAFKA_TAR_FILE}
+if [ ! -e "build/Components/${KAFKA_TAR_FILE}" ]
+then
+  wget -O build/Components/${KAFKA_TAR_FILE} $KAFKA_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${KAFKA_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+AMBARI_TAR_FILE=apache-ambari-${AMBARI_TAR_FILE}-src.tar.gz
+AMBARI_TAR_URL=${MIRROR}/apache/ambari/ambari-${AMBARI_TAR_FILE}/${AMBARI_TAR_FILE}
+if [ ! -e "build/Components/$AMBARI_TAR_FILE" ]
+then
+  wget -O build/Components/${AMBARI_TAR_FILE} $AMBARI_TAR_URL
+  if [ $? -ne 0 ]; then
+    echo "Download ${AMBARI_TAR_FILE} Fail."
+    exit 1
+  fi
+fi
+
+echo "Download Success."
+
+hdiutil mount temp/${CENTOS_ISO_FILE}
+if [ $? -ne 0 ]; then
+  echo "Mount CentOS ISO Fail."
+  exit 1
+fi
+
+mkdir -p build
+rsync -av --exclude=repodata/ /Volumes/CentOS_${CENTOS_TAR_FILE}_Final/ build
+chmod -R +w build
+find build -name TRANS.TBL -exec rm -f {} \; -print
+
+mkdir build/repodata
+cp /Volumes/CentOS_${CENTOS_TAR_FILE}_Final/repodata/*-minimal-x86_64.xml build/repodata/smr.xml
+
+# Remove iptables
+#<packagereq type='mandatory'>iptables-ipv6</packagereq>
+#<packagereq type='mandatory'>iptables</packagereq>
+#rm -rf build/Packages/iptables-*.rpm
+#sed -i -- '/iptables/d' build/repodata/smr.xml
+
+# Remove selinux
+rm -rf build/Packages/selinux-policy-*.rpm
+sed -i -- '/selinux-policy/d' build/repodata/smr.xml
+
+DISCINFO=`head -1 build/.discinfo`
+echo $DISCINFO
+cd build
+COMPDATA=`find repodata -name smr.xml`
+echo $COMPDATA
+createrepo -u "media://$DISCINFO" -g $COMPDATA .
+if [ $? -ne 0 ]; then
+  echo "Create Repository Fail."
+  cd ..
+  exit 1
+fi
+cd ..
+
+cp smr.kickstart build/isolinux/smr.cfg
+sed -i -- "s/#PASSWORD_HASH#/${PASSWORD_HASH}/g" build/isolinux/smr.cfg
+sed -i -- "s/#HADOOP_TAR_FILE#/${HADOOP_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#HBASE_TAR_FILE#/${HBASE_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#SPARK_TAR_FILE#/${SPARK_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#SQOOP_TAR_FILE#/${SQOOP_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#PIG_TAR_FILE#/${PIG_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#ZOOKEEPER_TAR_FILE#/${ZOOKEEPER_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#OOZIE_TAR_FILE#/${OOZIE_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#HIVE_TAR_FILE#/${HIVE_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#TEZ_TAR_FILE#/${TEZ_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#STORM_TAR_FILE#/${STORM_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#KAFKA_TAR_FILE#/${KAFKA_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#AMBARI_TAR_FILE#/${AMBARI_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#MESOS_TAR_FILE#/${MESOS_TAR_FILE}/g" build/isolinux/smr.cfg
+sed -i -- "s/#JDK_TAR_FILE#/${JDK_TAR_FILE}/g" build/isolinux/smr.cfg
+
+cp isolinux.kickstart build/isolinux/isolinux.cfg
+sed -i -- "s/#VERSION#/${VERSION}/g" build/isolinux/isolinux.cfg
+if [ $? -ne 0 ]; then
+  echo "Create KickStart Script Fail."
+  exit 1
+fi
+
+cp ~/.ssh/id_rsa.pub build/root_key.pub
+cd build
+mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table -V "smr-${VERSION}.iso" -p "TM" -A "smr-${VERSION}.iso" -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" --joliet-long -o ../dist/smr-${VERSION}.iso .
+if [ $? -ne 0 ]; then
+  echo "Build ISO Fail."
+  cd ..
+  exit 1
+fi
+cd ..
+
+echo "Build ISO Success."
+exit 0
