@@ -340,7 +340,7 @@ fi
 
 cp ~/.ssh/id_rsa.pub build/root_key.pub
 cd build
-mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table -V "smr-${VERSION}.iso" -p "TM" -A "smr-${VERSION}.iso" -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" --joliet-long -o ../dist/smr-${VERSION}.iso .
+mkisofs -r -R -J -T -v -no-emul-boot -boot-load-size 4 -boot-info-table -V "SMR-${VERSION}" -p "TM" -A "smr-${VERSION}.iso" -b isolinux/isolinux.bin -c isolinux/boot.cat -x "lost+found" --joliet-long -o ../dist/smr-${VERSION}.iso .
 if [ $? -ne 0 ]; then
   echo "Build ISO Fail."
   cd ..
@@ -349,4 +349,15 @@ fi
 cd ..
 
 echo "Build ISO Success."
+
+hdiutil convert -format UDRW -o dist/smr-${VERSION}.img dist/smr-${VERSION}.iso
+if [ $? -ne 0 ]; then
+  echo "Build IMG Fail."
+  exit 1
+fi
+
+mv dist/smr-${VERSION}.img.dmg dist/smr-${VERSION}.img
+
+echo "Build IMG Success."
+
 exit 0
